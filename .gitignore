@@ -54,6 +54,11 @@ sysinfo.txt
 tools/**/bin/
 tools/**/obj/
 
+# AI 助手在本地留下的工作笔记 / 会话数据。
+# 这类东西只对本机有意义，不该出现在公开仓库里；如果你希望连笔记一起版本化，
+# 把下面这行删掉即可。
+/.workbuddy/
+
 # 编辑器崩溃日志
 crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta

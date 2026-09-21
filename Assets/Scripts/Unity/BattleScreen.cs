@@ -1051,11 +1051,13 @@ namespace MountainWardBarrier.Game
                     }
                     break;
                 case SimEventType.WaveStarted:
-                    ShowBanner("第 " + e.a + " 波 —— 妖魔来袭！ ×" + Mathf.RoundToInt(e.amount), 2.2f);
+                    // 注意：该事件走 Make(type, int a, int b) 重载，数量在 b 上，amount 恒为 0。
+                    ShowBanner("第 " + e.a + " 波 —— 妖魔来袭！ ×" + e.b, 2.2f);
                     PlaySfx("sfx_wave_start", 0.95f, 0f);
                     break;
                 case SimEventType.WaveCleared:
-                    ShowBanner("本波已清 · 灵气 +" + Mathf.RoundToInt(e.amount), 2.0f);
+                    // 同上：清波奖励在 b 上。
+                    ShowBanner(e.b > 0 ? "本波已清 · 灵气 +" + e.b : "本波已清", 2.0f);
                     PlaySfx("sfx_unlock", 0.6f, 0.05f);
                     break;
                 case SimEventType.PrepPhaseStarted:

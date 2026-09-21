@@ -1,0 +1,65 @@
+# ============================================================
+#  《仙侠·护山大阵》.gitignore
+# ============================================================
+
+# ------------------------------------------------------------
+#  为什么不提交 ProjectSettings/
+#
+#  Unity 的 ProjectSettings/*.asset 里混着大量机器生成的 GUID 与哈希，
+#  在 git 上必然冲突，而且包名、竖屏、SDK 版本这些真正重要的设置
+#  会被淹没在几千行 YAML 里。
+#
+#  本工程改为把"必须的设置"写成代码：Assets/Editor/ProjectBootstrap.cs
+#  第一次打开工程时会自动跑一遍（也可以从菜单「仙侠·护山大阵/一键配置工程」手动执行）。
+#  所以这里只保留 ProjectVersion.txt，方便 Unity Hub 认出这是个 Unity 工程。
+# ------------------------------------------------------------
+/ProjectSettings/*
+!/ProjectSettings/ProjectVersion.txt
+
+# Unity 自动生成
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]serSettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/[Aa]ssets/AssetStoreTools*
+/[Aa]ssets/StreamingAssets/aa*
+
+# Visual Studio / Rider / VS Code
+/.vs/
+/.idea/
+/.vscode/
+/.vsconfig
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+
+# Unity 生成的解决方案与工程文件。
+# 只忽略**根目录**下的：tools/ 里的那两个 .csproj 是手写的，必须提交。
+/*.csproj
+/*.sln
+/*.unityproj
+/*.suo
+/*.user
+/*.userprefs
+/*.booproj
+/*.tmp
+
+# .NET 中间产物（tools/ 下的两个工程）
+tools/**/bin/
+tools/**/obj/
+
+# 编辑器崩溃日志
+crashlytics-build.properties
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+*~

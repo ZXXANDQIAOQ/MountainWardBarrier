@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    表现层编译自检工程。
+
+    它把 Assets/Scripts 下的全部代码连同 tools/UnityStubs 里的 API 桩一起编译，
+    于是**没有安装 Unity 的机器**也能验证：语法、成员名、参数个数、类型转换是否成立。
+    方法体不会真的执行，跑不了游戏，只做静态检查。
+
+    用法（需要 .NET SDK）：
+        dotnet build tools/UnityCheck/UnityCheck.csproj
+
+    语言版本固定 C# 7.3：比 Unity 2022 支持的 C# 9 更保守，
+    在这里通过就意味着在 Unity 里也一定通过。
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>UnityCheck</AssemblyName>
+    <RootNamespace>MountainWardBarrier.Check</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <OutputType>Library</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <NoWarn>$(NoWarn);CS0067;CS0649;CS0414;CS0169;CS0660;CS0661</NoWarn>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../Assets/Scripts/Core/*.cs" />
+    <Compile Include="../../Assets/Scripts/Unity/*.cs" />
+    <Compile Include="../../Assets/Editor/*.cs" />
+    <Compile Include="../UnityStubs/*.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    这个工程**不是** Unity 工程的一部分，它只是把 Assets/Scripts/Core 里的纯逻辑代码
+    抽出来，用普通的 .NET SDK 编译 + 跑单元测试。
+
+    好处：核心玩法逻辑可以在没有 Unity 的环境下被验证，改数值 / 改规则后
+    跑一句 `dotnet run` 就能知道有没有把游戏改坏。
+
+    LangVersion 特意锁在 7.3 —— 比 Unity 2022 支持的 C# 9 更保守，
+    能编译过就一定能被 Unity 编译过。
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AssemblyName>CoreTests</AssemblyName>
+    <RootNamespace>MountainWardBarrier.Tools</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>CS0168;CS0219;CS0414</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="BalanceBot.cs" />
+    <Compile Include="../../Assets/Scripts/Core/*.cs" />
+  </ItemGroup>
+
+</Project>

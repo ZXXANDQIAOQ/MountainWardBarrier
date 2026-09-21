@@ -1,0 +1,27 @@
+# 文本文件统一用 LF，避免在 Windows / macOS 之间反复产生整文件差异
+* text=auto eol=lf
+
+*.cs       text diff=csharp
+*.csproj   text
+*.md       text
+*.json     text
+*.gitignore text
+*.gitattributes text
+
+# Unity 的 YAML 资源（场景、预制体、meta）
+*.unity    text
+*.prefab   text
+*.asset    text
+*.meta     text
+
+# 二进制资源：交给 git 自己判断，不要做行尾转换
+*.png      binary
+*.jpg      binary
+*.wav      binary
+*.mp3      binary
+*.ogg      binary
+*.ttf      binary
+
+# Unity 用 YAML 序列化，但 diff 出来很难读，这里让 GitHub 折叠显示
+*.unity    linguist-generated
+*.asset    linguist-generated

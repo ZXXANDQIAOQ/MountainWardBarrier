@@ -25,3 +25,14 @@
 # Unity 用 YAML 序列化，但 diff 出来很难读，这里让 GitHub 折叠显示
 *.unity    linguist-generated
 *.asset    linguist-generated
+
+# ---------------------------------------------------------------
+# Windows 批处理必须是 CRLF（放在文件末尾，靠"后面的规则优先"覆盖上面的 eol=lf）
+#
+# tools/build_apk.bat 是要双击运行的批处理。LF 行尾在多数情况下也能跑，
+# 但一碰到多行块 / goto / label 就会出怪问题，所以强制 CRLF。
+# 同理，批处理内容必须保持纯 ASCII —— 非 ASCII 会被 OEM 代码页搞乱，
+# 连里面的路径都可能变花，所以 .bat 里的注释写英文。
+# ---------------------------------------------------------------
+*.bat      text eol=crlf
+*.cmd      text eol=crlf

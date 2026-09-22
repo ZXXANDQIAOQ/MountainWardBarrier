@@ -136,7 +136,8 @@ MountainWardBarrier/
 │   │   │   ├── FpsCounter.cs         帧率显示（设置里可开）
 │   │   │   └── Palette.cs            全局配色
 │   │   └── Editor/
-│   │       └── ProjectBootstrap.cs   自动配置工程 + 贴图/音频导入规则
+│   │       ├── ProjectBootstrap.cs   自动配置工程 + 贴图/音频导入规则
+│   │       └── AndroidBuilder.cs     一键打包 APK（菜单 + 命令行两个入口）
 │   ├── Resources/
 │   │   ├── Config/game_config.json   ★ 数值配置表，改它即可调平衡（无需重编译）
 │   │   ├── Sprites/{Units,Terrain,UI}/   58 张精灵图（生成）
@@ -144,6 +145,7 @@ MountainWardBarrier/
 │   └── Scenes/                    主场景（由 Editor 脚本生成，不入库）
 ├── docs/                          玩法、架构、上手、数值与需求对照文档
 ├── tools/
+│   ├── build_apk.bat              一键打包 APK（双击即可，产物在 Build\Android\）
 │   ├── gen_sprites.py             精灵图生成器（Python + Pillow）
 │   ├── gen_audio.py               音效 / BGM 生成器（纯 Python 合成，无需第三方库）
 │   ├── gen_preview.py             把精灵图拼成预览图（README 里那两张）
@@ -269,6 +271,7 @@ dotnet run --project tools/CoreTests/CoreTests.csproj
 | `dotnet run --project tools/CoreTests/CoreTests.csproj` | 146 项核心逻辑自测 + 三难度平衡试打 |
 | `dotnet run --project tools/CoreTests/CoreTests.csproj export-config <路径>` | 从代码默认值导出配置 JSON |
 | `dotnet build tools/UnityCheck/UnityCheck.csproj` | **不需要 Unity** 的全工程类型检查 |
+| `tools\build_apk.bat` | 一键打包 Android APK（需要 Unity + 已激活许可） |
 | `python tools/gen_sprites.py` | 重新生成 58 张精灵图 |
 | `python tools/gen_audio.py` | 重新生成 22 个音频文件 |
 | `python tools/gen_preview.py` | 把精灵图拼成两张预览图（README 用的就是它们） |
@@ -290,7 +293,35 @@ dotnet run --project tools/CoreTests/CoreTests.csproj
 - **关闭联网权限与外部存储权限**（`forceInternetPermission = false`）—— 这是"零联网请求"的一部分
 - 色彩空间 Gamma，与生成素材时一致
 
-然后：`File → Build Settings`，选 Android，点 Build。
+### 一键打包（推荐）
+
+双击 **`tools\build_apk.bat`** 即可。它自己会找 Unity.exe、切到 Android 平台、
+关掉 `buildAppBundle`（否则出的是 .aab 而不是 APK），产物落在：
+
+```
+Build\Android\MountainWardBarrier.apk
+Build\Android\build.log          ← 打包失败时把这个日志发出来
+```
+
+批处理用的是 Unity 的 `-batchmode -executeMethod`，命令行入口是
+`Assets/Editor/AndroidBuilder.cs` 里的 `BuildFromCommandLine()`。
+它先把 `ProjectBootstrap.EnsureConfigured()` 跑一遍 —— 因为批处理模式下
+`EditorApplication.delayCall` 不保证执行，不显式配置的话场景没建、Build Settings 是空的，
+打包会以看不懂的方式失败。
+
+想从界面打包，用菜单 **仙侠·护山大阵 → 打包 Android APK** 效果完全一样。
+
+### 前置条件
+
+1. **Unity 许可已激活。** Unity 不给没激活的编辑器打包，这一步无法脚本化：
+   打开 Unity Hub → 登录 → 激活 Personal（免费版）即可。
+   注意 Unity 官方已停止 Personal 的手动激活（`.alf`/`.ulf`）流程，只能走 Hub 登录。
+2. **Android 模块齐全。** 需要 SDK（含 `platforms` + `build-tools`）、NDK、OpenJDK 三样，
+   缺一样打包都会失败。菜单 **配置 Android 打包路径** 会自动探测并接通，
+   跑完会弹一个摘要告诉你三条路径都是什么。
+3. 打包前 `Edit → Preferences → External Tools` 里三条路径应当都非空。
+
+首次 IL2CPP 打包比较慢（十几分钟量级），之后增量会快很多。
 
 APK 里没有任何广告 / 统计 SDK，也没有网络请求代码。
 

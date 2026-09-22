@@ -44,7 +44,9 @@ namespace UnityEditor
         public static string applicationContentsPath { get { return ""; } }
         // <Unity安装目录>/Editor/Unity.exe
         public static string applicationPath { get { return ""; } }
+        public static bool isBatchMode { get { return false; } }
         public static void ExecuteMenuItem(string menuItemPath) { }
+        public static void Exit(int returnValue) { }
     }
 
     public static class EditorPrefs
@@ -65,6 +67,7 @@ namespace UnityEditor
         public static void SetDirty(UnityEngine.Object target) { }
         public static void DisplayProgressBar(string title, string info, float progress) { }
         public static void ClearProgressBar() { }
+        public static void RevealInFinder(string path) { }
     }
 
     public enum ImportAssetOptions
@@ -260,9 +263,92 @@ namespace UnityEditor
         public static EditorBuildSettingsScene[] scenes { get; set; }
     }
 
+    // ---------------------------------------------------------------- 打包相关
+
+    public enum BuildTarget
+    {
+        NoTarget = -2,
+        StandaloneWindows = 5,
+        iOS = 9,
+        Android = 13,
+        StandaloneWindows64 = 19,
+        WebGL = 20,
+    }
+
+    public enum BuildTargetGroup
+    {
+        Unknown = 0,
+        Standalone = 1,
+        iOS = 4,
+        Android = 7,
+        WebGL = 13,
+    }
+
+    [Flags]
+    public enum BuildOptions
+    {
+        None = 0,
+        Development = 1,
+        AutoRunPlayer = 4,
+        ShowBuiltPlayer = 8,
+        BuildAdditionalStreamedScenes = 16,
+        AcceptExternalModificationsToPlayer = 32,
+        ConnectWithProfiler = 256,
+        AllowDebugging = 512,
+        SymlinkSources = 1024,
+        DetailedBuildReport = 2048,
+        CompressWithLz4 = 4096,
+    }
+
+    public struct BuildPlayerOptions
+    {
+        public string[] scenes { get; set; }
+        public string locationPathName { get; set; }
+        public string assetBundleManifestPath { get; set; }
+        public BuildTargetGroup targetGroup { get; set; }
+        public BuildTarget target { get; set; }
+        public BuildOptions options { get; set; }
+    }
+
+    public static class BuildPipeline
+    {
+        public static Build.Reporting.BuildReport BuildPlayer(BuildPlayerOptions options) { return null; }
+    }
+
+    public static class EditorUserBuildSettings
+    {
+        public static BuildTarget activeBuildTarget { get { return BuildTarget.Android; } }
+        public static bool buildAppBundle { get; set; }
+        public static bool SwitchActiveBuildTarget(BuildTargetGroup targetGroup, BuildTarget target) { return true; }
+    }
+
     public static class Selection
     {
         public static UnityEngine.Object activeObject { get; set; }
+    }
+}
+
+namespace UnityEditor.Build.Reporting
+{
+    public enum BuildResult
+    {
+        Unknown = 0,
+        Succeeded = 1,
+        Failed = 2,
+        Cancelled = 3,
+    }
+
+    public struct BuildSummary
+    {
+        public BuildResult result { get { return BuildResult.Succeeded; } }
+        public ulong totalSize { get { return 0UL; } }
+        public string outputPath { get { return ""; } }
+        public double totalTime { get { return 0.0; } }
+    }
+
+    public class BuildReport
+    {
+        public BuildSummary summary { get { return default(BuildSummary); } }
     }
 }
 

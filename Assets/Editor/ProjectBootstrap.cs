@@ -41,7 +41,7 @@ namespace MountainWardBarrier.EditorTools
         private static void AutoSetup()
         {
             // 每个工程路径记一个"配置版本"，升级版本号即可让所有人下次打开时自动重跑。
-            string key = SetupKey + "." + Application.dataPath.GetHashCode();
+            string key = ProjectKey();
             if (EditorPrefs.GetString(key, "") == SetupVersion)
             {
                 return;
@@ -61,6 +61,42 @@ namespace MountainWardBarrier.EditorTools
                     Debug.LogWarning("[ProjectBootstrap] 自动配置失败，可从菜单手动执行：" + e.Message);
                 }
             };
+        }
+
+        /// <summary>
+        /// 给这个工程算一个稳定的 EditorPrefs 键。
+        ///
+        /// 刻意不用 string.GetHashCode()：它只保证"同一个进程内一致"，
+        /// 不同运行时/不同进程之间可能给出不同的值。那样这个"配置版本"永远对不上，
+        /// 结果就是每次打开工程都白跑一遍配置 + 重导贴图。这里用 FNV-1a，结果只取决于路径。
+        /// </summary>
+        private static string ProjectKey()
+        {
+            string path = Application.dataPath;
+            unchecked
+            {
+                uint hash = 2166136261u;
+                for (int i = 0; i < path.Length; i++)
+                {
+                    hash ^= path[i];
+                    hash *= 16777619u;
+                }
+                return SetupKey + "." + hash.ToString("x8");
+            }
+        }
+
+        /// <summary>
+        /// 命令行打包前的兜底配置：把"第一次打开工程时该做的事"显式做一遍。
+        ///
+        /// 为什么需要它：-batchmode 下 EditorApplication.delayCall 不保证被调用，
+        /// AutoSetup 可能整段跳过，于是场景没建、Build Settings 是空的、Android 路径也没接，
+        /// 打包会莫名其妙地失败。命令行入口先调这里，行为就和"人先打开一次工程"等价了。
+        /// </summary>
+        public static void EnsureConfigured()
+        {
+            Configure(false);
+            ApplyAndroidPaths();
+            EditorPrefs.SetString(ProjectKey(), SetupVersion);
         }
 
         [MenuItem("仙侠·护山大阵/一键配置工程", false, 1)]

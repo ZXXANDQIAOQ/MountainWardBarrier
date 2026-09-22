@@ -640,6 +640,7 @@ namespace UnityEngine
         public static string companyName { get { return ""; } }
         public static bool isPlaying { get { return true; } }
         public static bool isMobilePlatform { get { return true; } }
+        public static bool isBatchMode { get { return false; } }
         public static RuntimePlatform platform { get { return RuntimePlatform.Android; } }
         public static void Quit() { }
     }

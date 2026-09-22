@@ -295,8 +295,8 @@ dotnet run --project tools/CoreTests/CoreTests.csproj
 
 ### 一键打包（推荐）
 
-双击 **`tools\build_apk.bat`** 即可。它自己会找 Unity.exe、切到 Android 平台、
-关掉 `buildAppBundle`（否则出的是 .aab 而不是 APK），产物落在：
+双击 **`tools\build_apk.bat`** 即可。它自己会找 Unity.exe、先检查许可是否已激活、
+切到 Android 平台、关掉 `buildAppBundle`（否则出的是 .aab 而不是 APK），产物落在：
 
 ```
 Build\Android\MountainWardBarrier.apk
@@ -313,13 +313,24 @@ Build\Android\build.log          ← 打包失败时把这个日志发出来
 
 ### 前置条件
 
-1. **Unity 许可已激活。** Unity 不给没激活的编辑器打包，这一步无法脚本化：
-   打开 Unity Hub → 登录 → 激活 Personal（免费版）即可。
-   注意 Unity 官方已停止 Personal 的手动激活（`.alf`/`.ulf`）流程，只能走 Hub 登录。
-2. **Android 模块齐全。** 需要 SDK（含 `platforms` + `build-tools`）、NDK、OpenJDK 三样，
-   缺一样打包都会失败。菜单 **配置 Android 打包路径** 会自动探测并接通，
-   跑完会弹一个摘要告诉你三条路径都是什么。
-3. 打包前 `Edit → Preferences → External Tools` 里三条路径应当都非空。
+**1. Unity 许可已激活（首次必做，只做一次）。**
+
+Unity 不给没激活的编辑器打包，这一步没法脚本化 —— 它必须用你自己的账号登录。
+`build_apk.bat` 会先检查 `C:\ProgramData\Unity\Unity_lic.ulf` 是否存在，
+没有的话会**自动帮你打开 Unity Hub** 并打印该点什么，你跟着做就行：
+
+1. Hub 里**登录**（本机是中国版 Hub，用 `unity.cn` 账号最稳）
+2. 进 **Licenses** 页 → **Add** → 选免费的 **Personal** → 确认
+3. 关掉 Hub，重新双击 `build_apk.bat`
+
+> 注意 Unity 官方**已停止 Personal 许可的手动激活**（`.alf` → 上传 → `.ulf`）流程，
+> 所以只能走 Hub 登录这条路，没有别的绕过方式。
+
+**2. Android 模块齐全。** 需要 SDK（含 `platforms` + `build-tools`）、NDK、OpenJDK 三样，
+缺一样打包都会失败。菜单 **配置 Android 打包路径** 会自动探测并接通，
+跑完会弹一个摘要告诉你三条路径都是什么。
+
+**3. 打包前 `Edit → Preferences → External Tools` 里三条路径应当都非空。**
 
 首次 IL2CPP 打包比较慢（十几分钟量级），之后增量会快很多。
 

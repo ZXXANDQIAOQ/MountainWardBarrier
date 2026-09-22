@@ -40,6 +40,10 @@ namespace UnityEditor
         public static CallbackFunction update;
         public static bool isPlaying { get { return false; } }
         public static bool isPlayingOrWillChangePlaymode { get { return false; } }
+        // <Unity安装目录>/Editor/Data
+        public static string applicationContentsPath { get { return ""; } }
+        // <Unity安装目录>/Editor/Unity.exe
+        public static string applicationPath { get { return ""; } }
         public static void ExecuteMenuItem(string menuItemPath) { }
     }
 

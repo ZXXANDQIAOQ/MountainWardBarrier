@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Reflection;
+using System.Text;
 using MountainWardBarrier.Game;
 using UnityEditor;
 using UnityEditor.Build;
@@ -62,6 +64,133 @@ namespace MountainWardBarrier.EditorTools
         public static void ConfigureFromMenu()
         {
             Configure(true);
+        }
+
+        // ============================================================ Android 打包路径
+
+        /// <summary>
+        /// 把 Android 打包要用的三条外部工具路径（SDK / NDK / JDK）一次性填好，
+        /// 省得在 Preferences → External Tools 里手点三遍。
+        ///
+        /// 只写"确实存在的目录"，探测不到的保持原样不覆盖。两条写入通道都试一遍：
+        ///   · EditorPrefs 的 AndroidSdkRoot / AndroidNdkRoot / JdkPath
+        ///   · 内部类 AndroidExternalToolsSettings 的静态属性（不同小版本存储位置有差异）
+        /// 两条都是"能写则写、写不了就跳过"，不会因为某个版本改了内部结构而报错。
+        /// </summary>
+        [MenuItem("仙侠·护山大阵/配置 Android 打包路径", false, 2)]
+        public static void ConfigureAndroidPaths()
+        {
+            // applicationContentsPath 指向 <Unity安装目录>/Editor/Data
+            string androidPlayer = Path.Combine(
+                EditorApplication.applicationContentsPath,
+                Path.Combine("PlaybackEngines", "AndroidPlayer"));
+
+            string sdk = FirstExisting(new string[]
+            {
+                Path.Combine(androidPlayer, "SDK"),
+                @"D:\App\Android\Sdk",
+                @"C:\Android\Sdk",
+            });
+            string ndk = FirstExisting(new string[]
+            {
+                Path.Combine(androidPlayer, "NDK"),
+            });
+            string jdk = FirstExisting(new string[]
+            {
+                Path.Combine(androidPlayer, "OpenJDK"),
+            });
+
+            ApplyAndroidToolPath("AndroidSdkRoot", "sdkRootPath", sdk);
+            ApplyAndroidToolPath("AndroidNdkRoot", "ndkRootPath", ndk);
+            ApplyAndroidToolPath("JdkPath", "jdkRootPath", jdk);
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Android 打包路径：");
+            sb.AppendLine();
+            sb.AppendLine("SDK：" + DescribePath(sdk));
+            sb.AppendLine("NDK：" + DescribePath(ndk));
+            sb.AppendLine("JDK：" + DescribePath(jdk));
+            sb.AppendLine();
+
+            bool complete = sdk != null && ndk != null && jdk != null;
+            if (complete)
+            {
+                sb.AppendLine("三条都已接通，可以直接 File → Build Settings → Android → Build。");
+            }
+            else
+            {
+                sb.AppendLine("有路径没找到，先按上面的清单补装，");
+                sb.AppendLine("或到 Edit → Preferences → External Tools 手动指定。");
+            }
+
+            string text = sb.ToString();
+            Debug.Log("[ProjectBootstrap] " + text.Replace("\r\n", "  ").Replace("\n", "  "));
+            EditorUtility.DisplayDialog("仙侠·护山大阵", text, "好");
+        }
+
+        private static void ApplyAndroidToolPath(string prefKey, string propName, string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
+            // 通道一：EditorPrefs（Unity 存外部工具路径的底层键）
+            try
+            {
+                EditorPrefs.SetString(prefKey, path);
+            }
+            catch (Exception)
+            {
+                // 个别版本会拒绝，忽略即可
+            }
+
+            // 通道二：内部 API。类型/属性名在不同小版本可能改，所以全程反射 + 静默失败。
+            try
+            {
+                Type settings = null;
+                Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                for (int i = 0; i < assemblies.Length; i++)
+                {
+                    settings = assemblies[i].GetType(
+                        "UnityEditor.Android.AndroidExternalToolsSettings", false);
+                    if (settings != null)
+                    {
+                        break;
+                    }
+                }
+                if (settings == null)
+                {
+                    return;
+                }
+                PropertyInfo prop = settings.GetProperty(
+                    propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                if (prop != null && prop.CanWrite)
+                {
+                    prop.SetValue(null, path, null);
+                }
+            }
+            catch (Exception)
+            {
+                // 走不通就只靠 EditorPrefs 那条通道
+            }
+        }
+
+        private static string FirstExisting(string[] candidates)
+        {
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                if (Directory.Exists(candidates[i]))
+                {
+                    return candidates[i];
+                }
+            }
+            return null;
+        }
+
+        private static string DescribePath(string path)
+        {
+            return string.IsNullOrEmpty(path) ? "（未找到）" : path;
         }
 
         [MenuItem("仙侠·护山大阵/重新导入全部美术资源", false, 20)]

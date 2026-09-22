@@ -51,6 +51,9 @@ namespace MountainWardBarrier.EditorTools
                 try
                 {
                     Configure(false);
+                    // 顺手把 Android 打包要用的 SDK / NDK / JDK 路径接上，
+                    // 省得第一次打包时还要去 Preferences → External Tools 手填三条。
+                    ApplyAndroidPaths();
                     EditorPrefs.SetString(key, SetupVersion);
                 }
                 catch (Exception e)
@@ -79,6 +82,17 @@ namespace MountainWardBarrier.EditorTools
         /// </summary>
         [MenuItem("仙侠·护山大阵/配置 Android 打包路径", false, 2)]
         public static void ConfigureAndroidPaths()
+        {
+            string text = ApplyAndroidPaths();
+            EditorUtility.DisplayDialog("仙侠·护山大阵", text, "好");
+        }
+
+        /// <summary>
+        /// 探测并把 SDK / NDK / JDK 三条路径接上，返回给人看的摘要。
+        /// 拆出这个方法，是为了让首次打开工程时的自动配置走同一条逻辑，
+        /// 又不必弹出对话框打断用户。
+        /// </summary>
+        internal static string ApplyAndroidPaths()
         {
             // applicationContentsPath 指向 <Unity安装目录>/Editor/Data
             string androidPlayer = Path.Combine(
@@ -125,7 +139,7 @@ namespace MountainWardBarrier.EditorTools
 
             string text = sb.ToString();
             Debug.Log("[ProjectBootstrap] " + text.Replace("\r\n", "  ").Replace("\n", "  "));
-            EditorUtility.DisplayDialog("仙侠·护山大阵", text, "好");
+            return text;
         }
 
         private static void ApplyAndroidToolPath(string prefKey, string propName, string path)
